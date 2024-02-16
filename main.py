@@ -1,7 +1,6 @@
 from time import sleep
 from os import system
 from serial import *
-import paho.mqtt.client as mqtt
 
 test_serial = Serial('COM4', 115200, timeout=0.1)
 
