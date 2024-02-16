@@ -1,7 +1,7 @@
 from time import sleep
 from os import system
 from serial import *
-from paho.mqtt.client import mqtt
+import paho.mqtt.client as mqtt
 
 test_serial = Serial('COM3', 115200, timeout=0.1)
 
@@ -14,6 +14,8 @@ STOP = 'BB	00	28	00 00	28	7E' #Stop Multi Inventory
 READ = 'BB 00 39 00 09 00 00 00 00 03 00 00 00 02 45 7E' #Read User Memory
 
 VERSION = 'BB 00 03 00 01 00 04 7E'
+
+client = mqtt.Client()
 
 readUserMemory0 = 'BB 00 39 00 09 00 00 00 00 00 00 00 00 07 49 7E'
 # 0 Reserved Memory
@@ -34,6 +36,20 @@ def send_cmd(cmd):
     
     return hex_space
 
+def connect_to_broker(broker_address, port, username, password):
+    broker_address = "127.0.0.1"
+    port = 1883
+    username = "pi"
+    password = "raspberry"
+
+    client = mqtt.Client()
+    client.username_pw_set(username, password)
+    client.connect(broker_address, port)
+    return client
+
+def publish_message(client, topic, message):
+    client.publish(topic, message)
+    print(f"Published message: {message}")
 
 def main():
     terdaftar = 'E8 79 30 00 E2 80 68 94 00 00 40 17 43 54 A1 14 00 00 00 00'
@@ -41,11 +57,10 @@ def main():
     sliced = read1[60:119]
     print(read1)
     if sliced == terdaftar:
-        print('Terdaftar')
-    else:
-        print('Tidak Terdaftar')
+        client.publish("rfid", "FL1")
 
 if __name__ == '__main__':
+    
     while True:
         # read1 = send_cmd(readUserMemory1)
         # print(read1)
